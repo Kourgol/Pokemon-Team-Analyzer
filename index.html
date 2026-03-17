@@ -140,7 +140,6 @@ const TYPE_COLORS = {Normal:"#A8A878",Fuego:"#F08030",Agua:"#6890F0",Planta:"#78
 const TYPE_TEXT = {Normal:"#fff",Fuego:"#fff",Agua:"#fff",Planta:"#fff",Eléctrico:"#333",Hielo:"#333",Lucha:"#fff",Veneno:"#fff",Tierra:"#333",Volador:"#fff",Psíquico:"#fff",Bicho:"#fff",Roca:"#fff",Fantasma:"#fff",Dragón:"#fff",Siniestro:"#fff",Acero:"#333",Hada:"#fff"};
 
 // ─── TABLA OFENSIVA ─────────────────────────────────────────────────────────
-// OFFENSE[atacante][defensor] = multiplicador  (solo se listan los no-neutros)
 const OFFENSE = {
   "Normal":    {"Roca":0.5,"Acero":0.5,"Fantasma":0},
   "Fuego":     {"Fuego":0.5,"Agua":0.5,"Roca":0.5,"Dragón":0.5,"Planta":2,"Hielo":2,"Bicho":2,"Acero":2},
@@ -162,36 +161,41 @@ const OFFENSE = {
   "Hada":      {"Fuego":0.5,"Lucha":0.5,"Bicho":0.5,"Siniestro":0.5,"Dragón":0,"Veneno":2,"Acero":2},
 };
 
-// ─── TABLA DEFENSIVA (derivada de la ofensiva) ──────────────────────────────
-// DEFENSE[defensor][atacante] = multiplicador
-// Se construye automáticamente: para cada entrada OFFENSE[A][D]=x → DEFENSE[D][A]=x
-const DEFENSE = {};
-for (const t of TYPES) DEFENSE[t] = {};
-for (const [attacker, targets] of Object.entries(OFFENSE)) {
-  for (const [defender, mult] of Object.entries(targets)) {
-    DEFENSE[defender][attacker] = mult;
-  }
-}
-// Todo lo que no aparezca en DEFENSE[defensor] es neutro (x1)
+// ─── TABLA DEFENSIVA  ──────────────────────────────────────────────
+const DEFENSE = {
+  "Normal":    {"Lucha":2,"Fantasma":0},
+  "Fuego":     {"Agua":2,"Tierra":2,"Roca":2,"Fuego":0.5,"Planta":0.5,"Hielo":0.5,"Bicho":0.5,"Acero":0.5,"Hada":0.5},
+  "Agua":      {"Eléctrico":2,"Planta":2,"Fuego":0.5,"Agua":0.5,"Hielo":0.5,"Acero":0.5},
+  "Planta":    {"Fuego":2,"Hielo":2,"Veneno":2,"Volador":2,"Bicho":2,"Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Tierra":0.5},
+  "Eléctrico": {"Tierra":2,"Eléctrico":0.5,"Volador":0.5,"Acero":0.5},
+  "Hielo":     {"Fuego":2,"Lucha":2,"Roca":2,"Acero":2,"Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Hielo":0.5},
+  "Lucha":     {"Psíquico":2,"Volador":2,"Hada":2,"Normal":0.5,"Hielo":0.5,"Roca":0.5,"Siniestro":0.5,"Acero":0.5},
+  "Veneno":    {"Tierra":2,"Psíquico":2,"Fantasma":2,"Veneno":0.5,"Planta":0.5,"Lucha":0.5,"Bicho":0.5,"Hada":0.5},
+  "Tierra":    {"Agua":2,"Hielo":2,"Planta":2,"Bicho":2,"Eléctrico":0,"Veneno":0.5,"Roca":0.5,"Acero":0.5},
+  "Volador":   {"Eléctrico":2,"Hielo":2,"Roca":2,"Tierra":0,"Planta":0.5,"Lucha":0.5,"Bicho":0.5},
+  "Psíquico":  {"Bicho":2,"Fantasma":2,"Siniestro":2,"Lucha":0.5,"Psíquico":0.5},
+  "Bicho":     {"Fuego":2,"Roca":2,"Volador":2,"Planta":0.5,"Lucha":0.5,"Tierra":0.5},
+  "Roca":      {"Agua":2,"Planta":2,"Lucha":2,"Tierra":2,"Normal":0.5,"Fuego":0.5,"Volador":0.5,"Veneno":0.5},
+  "Fantasma":  {"Fantasma":2,"Siniestro":2,"Normal":0,"Lucha":0},
+  "Dragón":    {"Hada":2,"Acero":2,"Dragón":0.5},
+  "Siniestro": {"Lucha":2,"Bicho":2,"Hada":2,"Fantasma":0.5,"Siniestro":0.5},
+  "Acero":     {"Fuego":2,"Lucha":2,"Tierra":2,"Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Volador":0.5,"Psíquico":0.5,"Hielo":0.5,"Bicho":0.5,"Roca":0.5,"Dragón":0.5,"Acero":0.5,"Hada":0.5},
+  "Hada":      {"Veneno":2,"Acero":2,"Dragón":2,"Lucha":0.5,"Bicho":0.5,"Siniestro":0.5,"Fuego":0.5}
+};
 
-// ─── Calcular multiplicador total que recibe un Pokémon de un tipo atacante ──
-// Multiplica los modificadores defensivos de cada uno de sus tipos
+// ─── Multiplicador total que recibe un Pokémon (uno o dos tipos)
 function getDefMult(attackType, defenderTypes) {
-  let m = 1;
-  for (const dt of defenderTypes) {
+  return defenderTypes.reduce((mult, dt) => {
     const row = DEFENSE[dt] || {};
-    if (row[attackType] !== undefined) m *= row[attackType];
-  }
-  return m;
+    return mult * (row[attackType] !== undefined ? row[attackType] : 1);
+  }, 1);
 }
 
-// ─── Calcular la mejor efectividad ofensiva de un tipo de movimiento
-// contra un único tipo defensor (para el análisis de cobertura)
+// ─── Mejor efectividad ofensiva de un ataque contra un tipo
 function getOffMult(moveType, defenderType) {
   const row = OFFENSE[moveType] || {};
   return row[defenderType] !== undefined ? row[defenderType] : 1;
 }
-
 // ─── Sprites ─────────────────────────────────────────────────────────────────
 const DEX = {
   "Bulbasaur":1,"Ivysaur":2,"Venusaur":3,"Charmander":4,"Charmeleon":5,"Charizard":6,
