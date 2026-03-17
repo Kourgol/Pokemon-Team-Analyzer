@@ -259,7 +259,7 @@ const OFF_MOVES = {
   "Pound":"Normal","Comet Punch":"Normal","Fury Attack":"Normal","Horn Attack":"Normal",
   "Skull Bash":"Normal","Barrage":"Normal","Egg Bomb":"Normal","Dizzy Punch":"Normal",
   "Bind":"Normal","Wrap":"Normal","Constrict":"Normal","Chip Away":"Normal",
-  "Body Press":"Normal","Rage":"Normal","Bide":"Normal","Round":"Normal","Echoed Voice":"Normal",
+  "Body Press":"Lucha","Rage":"Normal","Bide":"Normal","Round":"Normal","Echoed Voice":"Normal",
   "Reversion":"Normal","Double Hit":"Normal","Slash":"Normal","Thrash":"Normal",
   "Judgment":"Normal","Natural Gift":"Normal","Techno Blast":"Normal","Tera Blast":"Normal",
   "Population Bomb":"Normal","Hyper Drill":"Normal","Hard Press":"Normal","Mortal Spin":"Normal",
@@ -287,7 +287,7 @@ const OFF_MOVES = {
   "Energy Ball":"Planta","Giga Drain":"Planta","Mega Drain":"Planta","Absorb":"Planta",
   "Grass Knot":"Planta","Power Whip":"Planta","Wood Hammer":"Planta","Horn Leech":"Planta",
   "Frenzy Plant":"Planta","Leaf Storm":"Planta","Bullet Seed":"Planta","Magical Leaf":"Planta",
-  "Grass Pledge":"Planta","Petal Dance":"Planta","Pollen Puff":"Planta","Drum Beating":"Planta",
+  "Grass Pledge":"Planta","Petal Dance":"Planta","Drum Beating":"Planta",
   "Branch Poke":"Planta","Trailblaze":"Planta","Flower Trick":"Planta","Trop Kick":"Planta",
   "Grassy Glide":"Planta","Solar Blade":"Planta","Snap Trap":"Planta","Leafage":"Planta",
   // Eléctrico
@@ -313,7 +313,7 @@ const OFF_MOVES = {
   "Low Sweep":"Lucha","Submission":"Lucha","Vital Throw":"Lucha","Sky Uppercut":"Lucha",
   "Superpower":"Lucha","Aura Sphere":"Lucha","Vacuum Wave":"Lucha","Force Palm":"Lucha",
   "Storm Throw":"Lucha","Sacred Sword":"Lucha","Secret Sword":"Lucha","Flying Press":"Lucha",
-  "Circle Throw":"Lucha","Body Press":"Lucha","Collision Course":"Lucha","Reversal":"Lucha",
+  "Circle Throw":"Lucha","Collision Course":"Lucha","Reversal":"Lucha",
   "Revenge":"Lucha","Wake-Up Slap":"Lucha","Double Kick":"Lucha","Triple Kick":"Lucha",
   "Arm Thrust":"Lucha","Focus Blast":"Lucha","Seismic Toss":"Lucha","Counter":"Lucha",
   // Veneno
@@ -342,7 +342,7 @@ const OFF_MOVES = {
   "Confusion":"Psíquico","Dream Eater":"Psíquico","Heart Stamp":"Psíquico",
   "Prismatic Laser":"Psíquico","Photon Geyser":"Psíquico","Expanding Force":"Psíquico",
   "Freezing Glare":"Psíquico","Lumina Crash":"Psíquico","Psych Up":"Psíquico",
-  "Power Gem":"Psíquico","Hyper Space Fury":"Psíquico","Hyper Space Hole":"Psíquico",
+  "Hyper Space Fury":"Psíquico","Hyper Space Hole":"Psíquico",
   // Bicho
   "X-Scissor":"Bicho","Bug Buzz":"Bicho","U-turn":"Bicho","Signal Beam":"Bicho",
   "Silver Wind":"Bicho","Struggle Bug":"Bicho","Infestation":"Bicho","Leech Life":"Bicho",
@@ -375,9 +375,7 @@ const OFF_MOVES = {
   "Assurance":"Siniestro","Throat Chop":"Siniestro","Lash Out":"Siniestro",
   "Wicked Blow":"Siniestro","Fiery Wrath":"Siniestro","Jaw Lock":"Siniestro",
   "Brutal Swing":"Siniestro","Darkest Lariat":"Siniestro","Snarl":"Siniestro",
-  "Thief":"Siniestro","Payback":"Siniestro","Punishment":"Siniestro",
-  "Hyper Fang":"Siniestro","Suckered Punch":"Siniestro","Ruination":"Siniestro",
-  "Population Bomb":"Siniestro","Chilling Water":"Siniestro",
+  "Thief":"Siniestro","Payback":"Siniestro","Punishment":"Siniestro","Ruination":"Siniestro",
   // Acero
   "Iron Head":"Acero","Flash Cannon":"Acero","Meteor Mash":"Acero","Steel Wing":"Acero",
   "Bullet Punch":"Acero","Gyro Ball":"Acero","Heavy Slam":"Acero","Smart Strike":"Acero",
@@ -1157,7 +1155,7 @@ function renderTeam() {
       const p = team[i];
       slot.className = 'poke-slot';
       const typeBadges = p.types.map(t=>`<span class="type-badge" style="background:${TYPE_COLORS[t]};color:${TYPE_TEXT[t]};">${t}</span>`).join('');
-      const moveBtns = TYPES.map(t=>`<span class="move-type-btn ${p.moveTypes.has(t)?'active':'inactive'}" style="background:${TYPE_COLORS[t]};color:${TYPE_TEXT[t]};">${t}</span>`).join('');
+      const moveBtns = TYPES.map(t=>`<span class="move-type-btn ${p.moveTypes.has(t)?'active':'inactive'}" style="background:${TYPE_COLORS[t]};color:${TYPE_TEXT[t]};cursor:pointer;" onclick="toggleSlotMove(${i},'${t}')">${t}</span>`).join('');
       slot.innerHTML = `
         <div class="slot-header">
           <button class="btn small" onclick="editPokemon(${i})">Editar</button>
@@ -1169,7 +1167,7 @@ function renderTeam() {
         </div>
         <div class="poke-name">${p.name}</div>
         <div class="type-center">${typeBadges}</div>
-        <div class="slot-label">Movimientos ofensivos</div>
+        <div class="slot-label">Movimientos <span style="font-size:9px;opacity:0.55;">(toca para editar)</span></div>
         <div class="move-type-grid">${moveBtns}</div>`;
     } else {
       slot.className = 'poke-slot empty';
@@ -1241,6 +1239,22 @@ function editPokemon(i) {
   buildTypeChecks(p.types); selectedMoveTypes=new Set(p.moveTypes); buildMoveGrid();
   document.getElementById('modalBg').classList.add('open');
 }
+function toggleSlotMove(slotIndex, tipo) {
+  const p = team[slotIndex];
+  if (!p) return;
+  if (p.moveTypes.has(tipo)) {
+    p.moveTypes.delete(tipo);
+  } else {
+    if (p.moveTypes.size >= 4) {
+      showToast("No puede tener más de 4 movimientos");
+      return;
+    }
+    p.moveTypes.add(tipo);
+  }
+  renderTeam();
+  document.getElementById('analysisOutput').innerHTML = '';
+}
+
 function removePokemon(i){team.splice(i,1);renderTeam();document.getElementById('analysisOutput').innerHTML='';}
 function closeModal(){document.getElementById('modalBg').classList.remove('open');document.getElementById('suggestions').style.display='none';}
 function savePokemon() {
