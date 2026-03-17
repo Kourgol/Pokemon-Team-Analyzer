@@ -139,13 +139,14 @@ const TYPES = ["Normal","Fuego","Agua","Planta","Eléctrico","Hielo","Lucha","Ve
 const TYPE_COLORS = {Normal:"#A8A878",Fuego:"#F08030",Agua:"#6890F0",Planta:"#78C850",Eléctrico:"#F8D030",Hielo:"#98D8D8",Lucha:"#C03028",Veneno:"#A040A0",Tierra:"#E0C068",Volador:"#A890F0",Psíquico:"#F85888",Bicho:"#A8B820",Roca:"#B8A038",Fantasma:"#705898",Dragón:"#7038F8",Siniestro:"#705848",Acero:"#B8B8D0",Hada:"#EE99AC"};
 const TYPE_TEXT = {Normal:"#fff",Fuego:"#fff",Agua:"#fff",Planta:"#fff",Eléctrico:"#333",Hielo:"#333",Lucha:"#fff",Veneno:"#fff",Tierra:"#333",Volador:"#fff",Psíquico:"#fff",Bicho:"#fff",Roca:"#fff",Fantasma:"#fff",Dragón:"#fff",Siniestro:"#fff",Acero:"#333",Hada:"#fff"};
 
-// ─── TABLA OFENSIVA ─────────────────────────────────────────────────────────
+// ─── TABLA OFENSIVA ──────────────────────────────────────────────────────────
+// OFFENSE[atacante][defensor] = multiplicador (solo entradas no neutras)
 const OFFENSE = {
   "Normal":    {"Roca":0.5,"Acero":0.5,"Fantasma":0},
   "Fuego":     {"Planta":2,"Hielo":2,"Bicho":2,"Acero":2,"Fuego":0.5,"Agua":0.5,"Roca":0.5,"Dragón":0.5},
   "Agua":      {"Fuego":2,"Tierra":2,"Roca":2,"Agua":0.5,"Planta":0.5,"Dragón":0.5},
-  "Eléctrico": {"Agua":2,"Volador":2,"Eléctrico":0.5,"Planta":0.5,"Dragón":0.5,"Tierra":0},
   "Planta":    {"Agua":2,"Tierra":2,"Roca":2,"Fuego":0.5,"Planta":0.5,"Veneno":0.5,"Volador":0.5,"Bicho":0.5,"Dragón":0.5,"Acero":0.5},
+  "Eléctrico": {"Agua":2,"Volador":2,"Eléctrico":0.5,"Planta":0.5,"Dragón":0.5,"Tierra":0},
   "Hielo":     {"Planta":2,"Tierra":2,"Volador":2,"Dragón":2,"Fuego":0.5,"Agua":0.5,"Hielo":0.5,"Acero":0.5},
   "Lucha":     {"Normal":2,"Hielo":2,"Roca":2,"Siniestro":2,"Acero":2,"Veneno":0.5,"Volador":0.5,"Psíquico":0.5,"Bicho":0.5,"Hada":0.5,"Fantasma":0},
   "Veneno":    {"Planta":2,"Hada":2,"Veneno":0.5,"Tierra":0.5,"Roca":0.5,"Fantasma":0.5,"Acero":0},
@@ -154,47 +155,51 @@ const OFFENSE = {
   "Psíquico":  {"Lucha":2,"Veneno":2,"Psíquico":0.5,"Acero":0.5,"Siniestro":0},
   "Bicho":     {"Planta":2,"Psíquico":2,"Siniestro":2,"Fuego":0.5,"Lucha":0.5,"Volador":0.5,"Fantasma":0.5,"Acero":0.5,"Hada":0.5},
   "Roca":      {"Fuego":2,"Hielo":2,"Volador":2,"Bicho":2,"Lucha":0.5,"Tierra":0.5,"Acero":0.5},
-  "Fantasma":  {"Fantasma":2,"Psíquico":2,"Normal":0,"Lucha":0},
+  "Fantasma":  {"Fantasma":2,"Psíquico":2,"Siniestro":0.5,"Normal":0,"Lucha":0},
   "Dragón":    {"Dragón":2,"Acero":0.5,"Hada":0},
   "Siniestro": {"Fantasma":2,"Psíquico":2,"Lucha":0.5,"Siniestro":0.5,"Hada":0.5},
-  "Acero":     {"Roca":2,"Hielo":2,"Hada":2,"Fuego":0.5,"Agua":0.5,"Eléctrico":0.5,"Acero":0.5,"Planta":0.5,"Volador":0.5,"Psíquico":0.5,"Bicho":0.5,"Dragón":0.5},
-  "Hada":      {"Dragón":2,"Lucha":2,"Siniestro":2,"Fuego":0.5,"Veneno":0.5,"Acero":0.5,"Bicho":0.5}
-};
-// ─── TABLA DEFENSIVA  ──────────────────────────────────────────────
-const DEFENSE = {
-  "Normal":    {"Lucha":2,"Fantasma":0},
-  "Fuego":     {"Agua":2,"Tierra":2,"Roca":2,"Fuego":0.5,"Planta":0.5,"Hielo":0.5,"Bicho":0.5,"Acero":0.5,"Hada":0.5},
-  "Agua":      {"Eléctrico":2,"Planta":2,"Fuego":0.5,"Agua":0.5,"Hielo":0.5,"Acero":0.5},
-  "Planta":    {"Fuego":2,"Hielo":2,"Veneno":2,"Volador":2,"Bicho":2,"Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Tierra":0.5},
-  "Eléctrico": {"Tierra":2,"Eléctrico":0.5,"Volador":0.5,"Acero":0.5},
-  "Hielo":     {"Fuego":2,"Lucha":2,"Roca":2,"Acero":2,"Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Hielo":0.5},
-  "Lucha":     {"Psíquico":2,"Volador":2,"Hada":2,"Normal":0.5,"Hielo":0.5,"Roca":0.5,"Siniestro":0.5,"Acero":0.5},
-  "Veneno":    {"Tierra":2,"Psíquico":2,"Fantasma":2,"Veneno":0.5,"Planta":0.5,"Lucha":0.5,"Bicho":0.5,"Hada":0.5},
-  "Tierra":    {"Agua":2,"Hielo":2,"Planta":2,"Bicho":2,"Eléctrico":0,"Veneno":0.5,"Roca":0.5,"Acero":0.5},
-  "Volador":   {"Eléctrico":2,"Hielo":2,"Roca":2,"Tierra":0,"Planta":0.5,"Lucha":0.5,"Bicho":0.5},
-  "Psíquico":  {"Bicho":2,"Fantasma":2,"Siniestro":2,"Lucha":0.5,"Psíquico":0.5},
-  "Bicho":     {"Fuego":2,"Roca":2,"Volador":2,"Planta":0.5,"Lucha":0.5,"Tierra":0.5},
-  "Roca":      {"Agua":2,"Planta":2,"Lucha":2,"Tierra":2,"Normal":0.5,"Fuego":0.5,"Volador":0.5,"Veneno":0.5},
-  "Fantasma":  {"Fantasma":2,"Siniestro":2,"Normal":0,"Lucha":0},
-  "Dragón":    {"Hada":2,"Acero":2,"Dragón":0.5},
-  "Siniestro": {"Lucha":2,"Bicho":2,"Hada":2,"Fantasma":0.5,"Siniestro":0.5},
-  "Acero":     {"Fuego":2,"Lucha":2,"Tierra":2,"Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Volador":0.5,"Psíquico":0.5,"Hielo":0.5,"Bicho":0.5,"Roca":0.5,"Dragón":0.5,"Acero":0.5,"Hada":0.5},
-  "Hada":      {"Veneno":2,"Acero":2,"Dragón":2,"Lucha":0.5,"Bicho":0.5,"Siniestro":0.5,"Fuego":0.5}
+  "Acero":     {"Roca":2,"Hielo":2,"Hada":2,"Fuego":0.5,"Agua":0.5,"Eléctrico":0.5,"Acero":0.5,"Normal":0.5,"Planta":0.5,"Volador":0.5,"Psíquico":0.5,"Bicho":0.5,"Dragón":0.5,"Veneno":0},
+  "Hada":      {"Lucha":2,"Siniestro":2,"Dragón":0,"Fuego":0.5,"Veneno":0.5,"Acero":0.5,"Bicho":0.5},
 };
 
-// ─── Multiplicador total que recibe un Pokémon (uno o dos tipos)
+// ─── TABLA DEFENSIVA ─────────────────────────────────────────────────────────
+// DEFENSE[defensor][atacante] = multiplicador
+// Derivada matemáticamente de OFFENSE — incluye todas las inmunidades (x0)
+const DEFENSE = {
+  "Normal":     {"Lucha":2, "Fantasma":0, "Acero":0.5},
+  "Fuego":      {"Agua":2,"Tierra":2,"Roca":2, "Fuego":0.5,"Planta":0.5,"Hielo":0.5,"Bicho":0.5,"Acero":0.5,"Hada":0.5},
+  "Agua":       {"Eléctrico":2,"Planta":2, "Fuego":0.5,"Agua":0.5,"Hielo":0.5,"Acero":0.5},
+  "Planta":     {"Fuego":2,"Hielo":2,"Veneno":2,"Volador":2,"Bicho":2, "Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Tierra":0.5},
+  "Eléctrico":  {"Tierra":2, "Eléctrico":0.5,"Volador":0.5,"Acero":0.5},
+  "Hielo":      {"Fuego":2,"Lucha":2,"Roca":2,"Acero":2, "Agua":0.5,"Hielo":0.5},
+  "Lucha":      {"Psíquico":2,"Volador":2,"Hada":2, "Fantasma":0, "Roca":0.5,"Bicho":0.5,"Siniestro":0.5},
+  "Veneno":     {"Tierra":2,"Psíquico":2, "Acero":0, "Veneno":0.5,"Planta":0.5,"Lucha":0.5,"Bicho":0.5,"Hada":0.5},
+  "Tierra":     {"Agua":2,"Hielo":2,"Planta":2, "Eléctrico":0, "Veneno":0.5,"Roca":0.5},
+  "Volador":    {"Eléctrico":2,"Hielo":2,"Roca":2, "Tierra":0, "Planta":0.5,"Lucha":0.5,"Bicho":0.5,"Acero":0.5},
+  "Psíquico":   {"Bicho":2,"Fantasma":2,"Siniestro":2, "Lucha":0.5,"Psíquico":0.5,"Acero":0.5},
+  "Bicho":      {"Fuego":2,"Roca":2,"Volador":2, "Planta":0.5,"Lucha":0.5,"Tierra":0.5,"Hada":0.5,"Acero":0.5},
+  "Roca":       {"Agua":2,"Planta":2,"Lucha":2,"Tierra":2,"Acero":2, "Normal":0.5,"Fuego":0.5,"Veneno":0.5,"Volador":0.5},
+  "Fantasma":   {"Fantasma":2,"Siniestro":2, "Normal":0,"Lucha":0, "Veneno":0.5,"Bicho":0.5},
+  "Dragón":     {"Hielo":2,"Dragón":2, "Fuego":0.5,"Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Acero":0.5},
+  "Siniestro":  {"Lucha":2,"Bicho":2,"Hada":2, "Psíquico":0, "Fantasma":0.5,"Siniestro":0.5},
+  "Acero":      {"Fuego":2,"Lucha":2,"Tierra":2, "Veneno":0, "Agua":0.5,"Eléctrico":0.5,"Planta":0.5,"Volador":0.5,"Psíquico":0.5,"Hielo":0.5,"Bicho":0.5,"Roca":0.5,"Dragón":0.5,"Acero":0.5,"Normal":0.5,"Hada":0.5},
+  "Hada":       {"Veneno":2,"Acero":2, "Dragón":0, "Lucha":0.5,"Bicho":0.5,"Siniestro":0.5,"Fuego":0.5},
+};
+
+// Multiplicador total que recibe un Pokémon dado su(s) tipo(s)
 function getDefMult(attackType, defenderTypes) {
   return defenderTypes.reduce((mult, dt) => {
-    const row = DEFENSE[dt] || {};
-    return mult * (row[attackType] !== undefined ? row[attackType] : 1);
+    const val = (DEFENSE[dt] || {})[attackType];
+    return mult * (val !== undefined ? val : 1);
   }, 1);
 }
 
-// ─── Mejor efectividad ofensiva de un ataque contra un tipo
+// Efectividad ofensiva de un movimiento contra un tipo simple
 function getOffMult(moveType, defenderType) {
-  const row = OFFENSE[moveType] || {};
-  return row[defenderType] !== undefined ? row[defenderType] : 1;
+  const val = (OFFENSE[moveType] || {})[defenderType];
+  return val !== undefined ? val : 1;
 }
+
 // ─── Sprites ─────────────────────────────────────────────────────────────────
 const DEX = {
   "Bulbasaur":1,"Ivysaur":2,"Venusaur":3,"Charmander":4,"Charmeleon":5,"Charizard":6,
@@ -815,11 +820,8 @@ function savePokemon() {
 
 function analyzeTeam() {
   if(!team.length){alert('Añade al menos un Pokémon');return;}
-
   const notResisted=[], noAnswer=[];
 
-  // Defensa: para cada tipo atacante, calcular el mejor multiplicador que consigue
-  // algún Pokémon del equipo (el más bajo = más resistente)
   TYPES.forEach(attackType => {
     let bestResist = Infinity;
     team.forEach(p => {
@@ -827,17 +829,13 @@ function analyzeTeam() {
       if(mult < bestResist) bestResist = mult;
     });
     if(bestResist === Infinity) bestResist = 1;
-    // Si nadie resiste (nadie tiene mult < 1), se considera que el equipo no lo resiste
     if(bestResist >= 1) notResisted.push({type: attackType, best: bestResist});
   });
 
-  // Ofensa: para cada tipo defensor, calcular la mejor efectividad que consigue
-  // algún movimiento de algún Pokémon del equipo
   TYPES.forEach(defType => {
     let bestEffect = 0;
     team.forEach(p => {
       p.moveTypes.forEach(moveType => {
-        // Efectividad de moveType contra un Pokémon de tipo único defType
         const mult = getOffMult(moveType, defType);
         if(mult > bestEffect) bestEffect = mult;
       });
@@ -849,7 +847,6 @@ function analyzeTeam() {
     `<span class="pill" style="background:${TYPE_COLORS[t]};color:${TYPE_TEXT[t]};opacity:${op};border:${border};">${t}<span class="eff">${extra}</span></span>`;
 
   let html = '';
-
   if(notResisted.length) {
     html += `<div class="analysis-block weak"><div class="analysis-title">Tu equipo no resiste</div>
     <div class="analysis-desc">Ningún Pokémon recibe estos ataques con multiplicador inferior a x1</div>
@@ -857,27 +854,21 @@ function analyzeTeam() {
   } else {
     html += `<div class="analysis-block good"><div class="analysis-title">Resistencia defensiva</div><div class="analysis-desc">¡Tu equipo tiene al menos una resistencia para cada tipo!</div></div>`;
   }
-
   if(noAnswer.length) {
     html += `<div class="analysis-block no-answer"><div class="analysis-title">Tu equipo no tiene respuesta contra</div>
-    <div class="analysis-desc">Ningún movimiento de tu equipo es supereficaz (x2 o más) contra estos tipos</div>
+    <div class="analysis-desc">Ningún movimiento es supereficaz (x2 o más) contra estos tipos</div>
     <div class="type-pill-row">${noAnswer.map(n=>pill(n.type,effLabel(n.best))).join('')}</div></div>`;
   } else {
     html += `<div class="analysis-block good"><div class="analysis-title">Cobertura ofensiva</div><div class="analysis-desc">¡Tu equipo tiene respuesta supereficaz para cada tipo!</div></div>`;
   }
-
   html += `<div class="coverage-block"><div class="analysis-title">Cobertura ofensiva completa</div>
   <div class="pill-row">${TYPES.map(t=>{
-    let best=0;
-    team.forEach(p=>p.moveTypes.forEach(mt=>{const v=getOffMult(mt,t);if(v>best)best=v;}));
+    let best=0; team.forEach(p=>p.moveTypes.forEach(mt=>{const v=getOffMult(mt,t);if(v>best)best=v;}));
     return pill(t,effLabel(best),best>=2?1:best===1?0.65:0.35);
   }).join('')}</div></div>`;
-
   html += `<div class="coverage-block" style="margin-top:10px;"><div class="analysis-title">Mejor resistencia defensiva por tipo</div>
   <div class="pill-row">${TYPES.map(at=>{
-    let best=Infinity;
-    team.forEach(p=>{const v=getDefMult(at,p.types);if(v<best)best=v;});
-    if(best===Infinity)best=1;
+    let best=Infinity; team.forEach(p=>{const v=getDefMult(at,p.types);if(v<best)best=v;}); if(best===Infinity)best=1;
     const op=best===0?1:best<=0.5?0.9:best<=1?0.55:0.3;
     return pill(at,effLabel(best),op,best<1?`2px solid ${TYPE_COLORS[at]}`:'none');
   }).join('')}</div></div>`;
